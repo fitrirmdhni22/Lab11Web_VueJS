@@ -159,3 +159,115 @@ form button {
     font-size: 13px;
     margin-top: 4px;
 }
+
+/* ===== Tambahan Praktikum 12 ===== */
+.nav-menu {
+    padding: 10px;
+    background: #eff1ff;
+    border-radius: 5px;
+    margin-bottom: 15px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: #3152d6;
+    font-weight: bold;
+    padding: 5px 10px;
+}
+
+/* Otomatis aktif saat route sedang dibuka */
+.router-link-exact-active {
+    background-color: #3152d6;
+    color: #ffffff !important;
+    border-radius: 3px;
+}
+
+.home-container {
+    padding: 20px;
+    border: 1px solid #eff1ff;
+    background: #fafafa;
+    border-radius: 5px;
+}
+
+.table-profil td {
+    padding: 8px 12px;
+}
+
+/* ===== Tambahan Praktikum 13 ===== */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 0;
+}
+
+.login-box {
+    width: 380px;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.login-box h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 9px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 14px;
+}
+
+.btn-login {
+    width: 100%;
+    padding: 10px;
+    background-color: #3152d6;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.btn-login:hover {
+    background-color: #203ca3;
+}
+
+.error-msg {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.nav-user {
+    color: #333;
+    font-size: 14px;
+}
+
+.nav-user a {
+    color: #c0392b;
+    font-weight: bold;
+    padding: 5px 10px;
+}

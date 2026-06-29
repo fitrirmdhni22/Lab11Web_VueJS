@@ -1,122 +1,95 @@
-const { createApp } = Vue
+const { createApp }                          = Vue;
+const { createRouter, createWebHashHistory } = VueRouter;
 
-// Sesuaikan dengan path CI4 kamu
-const apiUrl = 'http://localhost/lab11_ci/ci4/public'
+// Sesuaikan dengan URL project CI4 kamu
+const apiUrl = 'http://localhost/lab11_ci/ci4/public';
 
-createApp({
+// =========================================================================
+// AXIOS INTERCEPTORS — Otomatis suntikkan token di setiap request
+// =========================================================================
+axios.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('userToken');
+        if (token) {
+            config.headers['Authorization'] = 'Bearer ' + token;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// Tangkap response error 401 secara global
+axios.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            alert('Sesi Anda telah berakhir atau Token tidak sah. Silakan login kembali.');
+            localStorage.clear();
+            window.location.href = '#/login';
+            window.location.reload();
+        }
+        return Promise.reject(error);
+    }
+);
+// =========================================================================
+
+// 1. Definisikan rute
+const routes = [
+    { path: '/',      component: Home  },
+    { path: '/login', component: Login },
+    {
+        path:      '/artikel',
+        component: Artikel,
+        meta: { requiresAuth: true }
+    },
+    {
+        path:      '/about',
+        component: About,
+        meta: { requiresAuth: true }
+    }
+];
+
+// 2. Buat instance router
+const router = createRouter({
+    history: createWebHashHistory(),
+    routes
+});
+
+// 3. Navigation Guards
+router.beforeEach((to, from, next) => {
+    const isAuthenticated = localStorage.getItem('isLoggedIn') === 'true';
+
+    if (to.matched.some(record => record.meta.requiresAuth) && !isAuthenticated) {
+        alert('Akses Ditolak! Anda harus login terlebih dahulu.');
+        next('/login');
+    } else {
+        next();
+    }
+});
+
+// 4. Root App
+const app = createApp({
     data() {
         return {
-            artikel: [],
-            loading: false,
-            errorMsg: '',
-            showForm: false,
-            formTitle: 'Tambah Data',
-            formData: {
-                id: null,
-                judul: '',
-                isi: '',
-                status: 0
-            },
-            statusOptions: [
-                { text: 'Draft',   value: 0 },
-                { text: 'Publish', value: 1 },
-            ],
+            isLoggedIn: false,
+            userName:   ''
         }
     },
-
     mounted() {
-        this.loadData()
+        this.isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        this.userName   = localStorage.getItem('userName') || '';
     },
-
     methods: {
-
-        // Ambil semua data dari API
-        loadData() {
-            this.loading = true
-            axios.get(apiUrl + '/post')
-                .then(response => {
-                    this.artikel = response.data.artikel
-                    this.loading = false
-                })
-                .catch(error => {
-                    console.log(error)
-                    this.loading = false
-                })
-        },
-
-        // Buka form tambah
-        tambah() {
-            this.showForm  = true
-            this.formTitle = 'Tambah Data'
-            this.errorMsg  = ''
-            this.formData  = { id: null, judul: '', isi: '', status: 0 }
-        },
-
-        // Buka form edit
-        edit(data) {
-            this.showForm  = true
-            this.formTitle = 'Edit Data'
-            this.errorMsg  = ''
-            this.formData  = {
-                id:     data.id,
-                judul:  data.judul,
-                isi:    data.isi,
-                status: data.status
+        logout() {
+            if (confirm('Apakah Anda yakin ingin keluar aplikasi?')) {
+                localStorage.clear();
+                this.isLoggedIn = false;
+                this.userName   = '';
+                this.$router.push('/');
             }
-        },
-
-        // Simpan data (tambah atau edit)
-        saveData() {
-            this.errorMsg = ''
-
-            if (!this.formData.judul.trim()) {
-                this.errorMsg = 'Judul tidak boleh kosong.'
-                return
-            }
-
-            if (this.formData.id) {
-                // Update
-                axios.put(apiUrl + '/post/' + this.formData.id, this.formData)
-                    .then(() => {
-                        this.showForm = false
-                        this.loadData()
-                    })
-                    .catch(error => {
-                        this.errorMsg = 'Gagal mengubah data.'
-                        console.log(error)
-                    })
-            } else {
-                // Insert
-                axios.post(apiUrl + '/post', this.formData)
-                    .then(() => {
-                        this.showForm = false
-                        this.loadData()
-                    })
-                    .catch(error => {
-                        this.errorMsg = 'Gagal menyimpan data.'
-                        console.log(error)
-                    })
-            }
-        },
-
-        // Hapus data
-        hapus(index, id) {
-            if (confirm('Yakin menghapus data ini?')) {
-                axios.delete(apiUrl + '/post/' + id)
-                    .then(() => {
-                        this.artikel.splice(index, 1)
-                    })
-                    .catch(error => {
-                        alert('Gagal menghapus data.')
-                        console.log(error)
-                    })
-            }
-        },
-
-        // Konversi status angka ke teks
-        statusText(status) {
-            return status == 1 ? 'Publish' : 'Draft'
         }
     }
+});
 
-}).mount('#app')
+app.use(router);
+app.mount('#app');
